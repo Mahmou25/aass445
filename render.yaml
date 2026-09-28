@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: website-checker
+    runtime: node
+    plan: free
+    buildCommand: npm install && npx playwright install --with-deps chromium
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production

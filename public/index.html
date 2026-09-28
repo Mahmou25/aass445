@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Website Checker — فاحص المواقع</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- ===== Header / Stats ===== -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-icon">🌐</div>
+      <div>
+        <h1>Website Checker</h1>
+        <span class="brand-sub">فحص حقيقي عبر متصفح مدمج</span>
+      </div>
+    </div>
+    <div class="stats" id="statsBar">
+      <div class="stat"><span class="stat-label">إجمالي</span><span class="stat-value" id="statTotal">0</span></div>
+      <div class="stat up"><span class="dot"></span><span class="stat-label">يعمل</span><span class="stat-value" id="statUp">0</span></div>
+      <div class="stat down"><span class="dot"></span><span class="stat-label">لا يعمل</span><span class="stat-value" id="statDown">0</span></div>
+      <div class="stat err"><span class="dot"></span><span class="stat-label">مشكلة</span><span class="stat-value" id="statErr">0</span></div>
+      <div class="stat"><span class="stat-label">تم الفحص</span><span class="stat-value" id="statDone">0 / 0</span></div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- ===== Sidebar ===== -->
+    <aside class="sidebar">
+      <section class="card controls">
+        <h2>قائمة المواقع</h2>
+        <textarea id="urlInput" rows="7" placeholder="https://site1.com&#10;https://site2.com&#10;...حتى 100 موقع"></textarea>
+        <div class="row">
+          <label>مهلة الانتظار
+            <select id="timeoutSelect">
+              <option value="5000">5 ثوانٍ</option>
+              <option value="10000">10 ثوانٍ</option>
+              <option value="15000" selected>15 ثانية</option>
+              <option value="30000">30 ثانية</option>
+              <option value="60000">60 ثانية</option>
+            </select>
+          </label>
+          <label>التوازي
+            <select id="concurrencySelect">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3" selected>3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+            </select>
+          </label>
+        </div>
+        <div class="btn-row">
+          <button id="startBtn" class="btn primary">▶ بدء الفحص</button>
+          <button id="stopBtn" class="btn danger" disabled>⏹ إيقاف</button>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-info"><span id="progressText">0 / 0</span><span id="progressPct">0%</span></div>
+          <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+        </div>
+      </section>
+
+      <section class="card actions">
+        <h2>إجراءات</h2>
+        <div class="btn-grid">
+          <button id="recheckFailedBtn" class="btn">🔄 إعادة فحص المتوقفة</button>
+          <button id="recheckAllBtn" class="btn">🔁 إعادة فحص الكل</button>
+          <button id="copyUpBtn" class="btn">📋 نسخ القائمة العاملة</button>
+          <button id="copyDownBtn" class="btn">📋 نسخ القائمة المتوقفة</button>
+          <div class="dropdown">
+            <button id="exportBtn" class="btn">⬇ تصدير النتائج</button>
+            <div class="dropdown-menu" id="exportMenu">
+              <button data-format="csv">CSV</button>
+              <button data-format="json">JSON</button>
+              <button data-format="txt">TXT</button>
+            </div>
+          </div>
+        </div>
+        <input type="search" id="searchInput" placeholder="🔍 بحث عن موقع..." />
+      </section>
+
+      <section class="card sites-card">
+        <h2>المواقع <span class="badge" id="sitesCount">0</span></h2>
+        <ul class="site-list" id="siteList"></ul>
+      </section>
+    </aside>
+
+    <!-- ===== Browser panel ===== -->
+    <section class="browser-panel">
+      <div class="browser-chrome">
+        <div class="nav-btns">
+          <button id="navBack" title="رجوع">←</button>
+          <button id="navForward" title="تقدم">→</button>
+          <button id="navReload" title="إعادة تحميل">↻</button>
+        </div>
+        <div class="url-bar">
+          <span class="status-dot" id="statusDot"></span>
+          <span class="url-text" id="urlText">about:blank</span>
+          <span class="loading-spinner" id="loadingSpinner"></span>
+        </div>
+        <div class="browser-status" id="browserStatus">بانتظار بدء الفحص</div>
+      </div>
+      <div class="browser-screen" id="browserScreen">
+        <div class="screen-placeholder" id="screenPlaceholder">
+          <div class="placeholder-icon">🖥️</div>
+          <p>شاشة المتصفح المدمج</p>
+          <p class="placeholder-sub">أدخل قائمة المواقع واضغط «بدء الفحص» — سيتم فتح كل موقع هنا فعليًا</p>
+        </div>
+        <img id="screenImg" alt="شاشة المتصفح" hidden />
+      </div>
+      <div class="activity-log" id="activityLog"></div>
+    </section>
+  </main>
+
+  <!-- ===== Results ===== -->
+  <section class="results" id="resultsSection" hidden>
+    <h2>نتائج الفحص</h2>
+    <div class="results-grid">
+      <div class="result-col up">
+        <h3>🟢 المواقع التي فتحت بنجاح <span class="badge" id="upCount">0</span></h3>
+        <ul id="upList"></ul>
+      </div>
+      <div class="result-col down">
+        <h3>🔴 المواقع التي لم تفتح <span class="badge" id="downCount">0</span></h3>
+        <ul id="downList"></ul>
+      </div>
+      <div class="result-col err">
+        <h3>🟡 مواقع بها مشكلة <span class="badge" id="errCount">0</span></h3>
+        <ul id="errList"></ul>
+      </div>
+    </div>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>
